@@ -2,169 +2,313 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import java.util.concurrent.TimeUnit;
-
 public class TestForQA {
     static WebDriver driver;
+    static WebElement login;
+    static WebElement password;
+    static WebElement loginButton;
+    static WebElement resetPasswordButton;
+    static Alert alert;
+    static boolean isSuccess = true;
+    static boolean isCorrect;
 
-    public static void main(String[] args) {
-        WebDriverManager.chromedriver().setup();
+    private void isDisplayedAndEnable(String name, WebElement element) {
+        boolean isDisplayed = element.isDisplayed();
+        boolean isEnabled = element.isEnabled();
 
+        System.out.println(name + "_displayed: " + isDisplayed);
+        System.out.println(name + "_enabled: " + isEnabled);
+        if (isSuccess) isSuccess = isDisplayed && isEnabled;
+    }
+
+    private boolean checkItAll() {
         //Start_Test
+        WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
-        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
-        //Home_Site
+        //Home_Site_QA_Login_Test
         driver.get("https://lmslite47vr.demo.mirapolis.ru/mira");
+        if (!driver.getCurrentUrl().endsWith("type=customloginpage")) {
+            System.out.println("Incorrect URL!");
+            return false;
+        }
 
         //Home_Button_Check
-        WebElement homeButton = driver.findElement(By.xpath("//body/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/a[1]"));
-        System.out.println("home_button_displayed: " + homeButton.isDisplayed());
-        System.out.println("home_button_enabled: " + homeButton.isEnabled());
-        homeButton.click();
-        System.out.println(driver.getCurrentUrl().endsWith("type=customloginpage"));
+        try {
+            WebElement homeButton = driver.findElement(By.xpath("//body/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/a[1]"));
+            isDisplayedAndEnable("home_button", homeButton);
+            homeButton.click();
+            isCorrect = driver.getCurrentUrl().endsWith("type=customloginpage");
+            System.out.println("home_button_work: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("home_button_not_found");
+            isSuccess = false;
+        }
 
         //Main_Login_Window_Check
-        WebElement mainLoginText = driver.findElement(By.xpath("//div[contains(text(),'Вход в систему')]"));
-        System.out.println("main_login_text_displayed: " + mainLoginText.isDisplayed());
-        System.out.println("main_login_text_enabled: " + mainLoginText.isEnabled());
-        System.out.println(mainLoginText.getText().equals("Вход в систему"));
+        try {
+            WebElement mainLoginText = driver.findElement(By.xpath("//div[contains(text(),'Вход в систему')]"));
+            isDisplayedAndEnable("main_login_text", mainLoginText);
+            isCorrect = mainLoginText.getText().equals("Вход в систему");
+            System.out.println("main_login_text_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("main_login_text_not_found");
+            isSuccess = false;
+        }
 
         //Login_Field_Check
-        WebElement login = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
-        System.out.println("login_displayed: " + login.isDisplayed());
-        System.out.println("login_enabled: " + login.isEnabled());
-        System.out.println(login.getAttribute("placeholder").equals("Введите ваш логин"));
+        try {
+            login = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
+            isDisplayedAndEnable("login_field", login);
+            isCorrect = login.getAttribute("placeholder").equals("Введите ваш логин");
+            System.out.println("login_field_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("login_field_not_found");
+            isSuccess = false;
+        }
 
         //Password_Field_Check
-        WebElement password = driver.findElement(By.xpath("//tbody/tr[2]/td[2]/div[1]/input[1]"));
-        System.out.println("password_displayed: " + password.isDisplayed());
-        System.out.println("password_enabled: " + password.isEnabled());
-        System.out.println(password.getAttribute("placeholder").equals("Введите ваш пароль"));
+        try {
+            password = driver.findElement(By.xpath("//tbody/tr[2]/td[2]/div[1]/input[1]"));
+            isDisplayedAndEnable("password_field", password);
+            isCorrect = password.getAttribute("placeholder").equals("Введите ваш пароль");
+            System.out.println("password_field_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("password_field_not_found");
+            isSuccess = false;
+        }
 
-        //Password_Visible_Check
-        WebElement passwordVisible = driver.findElement(By.xpath("//button[@id='show_password']"));
-        System.out.println("password_visible_displayed: " + passwordVisible.isDisplayed());
-        System.out.println("password_visible_enabled: " + passwordVisible.isEnabled());
-        password.sendKeys("1P73BP4Z");
+        //Password_Visible_Button_Check
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            WebElement passwordVisible = driver.findElement(By.xpath("//button[@id='show_password']"));
+            isDisplayedAndEnable("password_visible_button", passwordVisible);
+            password.sendKeys("1P73BP4Z");
+            isCorrect = password.getAttribute("type").equals("password");
+            System.out.println("password_type_check: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            passwordVisible.click();
+            isCorrect = password.getAttribute("type").equals("text");
+            System.out.println("password_text_type_check: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            password.clear();
+        } catch (WebDriverException wde) {
+            System.out.println("password_type_button_not_found");
+            isSuccess = false;
         }
-        String first = password.getAttribute("type");
-        System.out.println("password_type_check: " + first.equals("password"));
-        passwordVisible.click();
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        String second = password.getAttribute("type");
-        System.out.println("password_type_check: " + second.equals("text"));
-        password.clear();
 
         //Login_Button_Check
-        WebElement loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
-        System.out.println("login_button_displayed: " + loginButton.isDisplayed());
-        System.out.println("login_button_enabled: " + loginButton.isEnabled());
-        System.out.println(loginButton.getText().equals("Войти"));
+        try {
+            loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
+            isDisplayedAndEnable("login_button", loginButton);
+            isCorrect = loginButton.getText().equals("Войти");
+            System.out.println("login_button_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("login_button_not_found");
+            isSuccess = false;
+        }
 
         //Reset_Password_Check
-        WebElement resetPasswordButton = driver.findElement(By.xpath("//tbody/tr[1]/td[1]/a[1]/div[1]"));
-        System.out.println("reset_password_button_displayed: " + resetPasswordButton.isDisplayed());
-        System.out.println("reset_password_button_enabled: " + resetPasswordButton.isEnabled());
-        System.out.println(resetPasswordButton.getText().equals("Забыли пароль?"));
+        try {
+            resetPasswordButton = driver.findElement(By.xpath("//tbody/tr[1]/td[1]/a[1]/div[1]"));
+            isDisplayedAndEnable("reset_password_button", resetPasswordButton);
+            isCorrect = resetPasswordButton.getText().equals("Забыли пароль?");
+            System.out.println("reset_password_button_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("reset_password_button_not_found");
+            isSuccess = false;
+        }
 
         //Happy_Path_Check
-        login.sendKeys("fominaelena");
-        password.sendKeys("1P73BP4Z");
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        loginButton.click();
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        System.out.println(driver.findElement(By.xpath("//span[contains(text(),'Главная страница')]")).getText().equals("Главная страница"));
-        driver.findElement(By.xpath("//tbody/tr[1]/td[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]")).click();
-        driver.findElement(By.xpath("//span[contains(text(),'Выйти')]")).click();
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            login.sendKeys("fominaelena");
+            password.sendKeys("1P73BP4Z");
+            loginButton.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            isCorrect = driver.findElement(By.xpath("//span[contains(text(),'Главная страница')]")).getText().equals("Главная страница");
+            System.out.println("login_success: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            driver.findElement(By.xpath("//tbody/tr[1]/td[1]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]")).click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            driver.findElement(By.xpath("//span[contains(text(),'Выйти')]")).click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (WebDriverException wde) {
+            System.out.println("happy_path_failed!");
+            System.out.println(wde.getMessage());
+            isSuccess = false;
         }
 
         //Bad_Path_All_Credential_Check
-        login = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
-        login.sendKeys("Az04!~#$%^&*()_+");
-        password = driver.findElement(By.xpath("//tbody/tr[2]/td[2]/div[1]/input[1]"));
-        password.sendKeys("Az04!~#$%^&*()_+");
-        loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            login = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
+            login.sendKeys("Az04!~#$%^&*()_+");
+            password = driver.findElement(By.xpath("//tbody/tr[2]/td[2]/div[1]/input[1]"));
+            password.sendKeys("Az04!~#$%^&*()_+");
+            loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
+            loginButton.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            alert = driver.switchTo().alert();
+            isCorrect = alert.getText().equals("Неверные данные для авторизации");
+            System.out.println("wrong_all_credential_check: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            alert.accept();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (WebDriverException wde) {
+            System.out.println("bad_path_failed!");
+            System.out.println(wde.getMessage());
+            isSuccess = false;
         }
-        loginButton.click();
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Alert alert = driver.switchTo().alert();
-        System.out.println("wrong_all_credential_check: " + alert.getText().equals("Неверные данные для авторизации"));
-        alert.accept();
 
         //Bad_Path_Without_Credential_Check
-        loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
+            loginButton.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            alert = driver.switchTo().alert();
+            isCorrect = alert.getText().equals("Неверные данные для авторизации.");
+            System.out.println("wrong_without_credential_check: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            alert.accept();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (WebDriverException wde) {
+            System.out.println("bad_path_failed!");
+            System.out.println(wde.getMessage());
+            isSuccess = false;
         }
-        loginButton.click();
-        alert = driver.switchTo().alert();
-        System.out.println("wrong_without_credential_check: " + alert.getText().equals("Неверные данные для авторизации."));
-        alert.accept();
 
         //Bad_Path_No_Password_Credential_Check
-        login = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
-        login.sendKeys("Az04!~#$%^&*()_+");
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            login = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
+            login.sendKeys("Az04!~#$%^&*()_+");
+            loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
+            loginButton.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            alert = driver.switchTo().alert();
+            isCorrect = alert.getText().equals("Неверные данные для авторизации.");
+            System.out.println("wrong_no_password_credential_check: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            alert.accept();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (WebDriverException wde) {
+            System.out.println("bad_path_failed!");
+            System.out.println(wde.getMessage());
+            isSuccess = false;
         }
-        loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
-        loginButton.click();
-        alert = driver.switchTo().alert();
-        System.out.println("wrong_no_password_credential_check: " + alert.getText().equals("Неверные данные для авторизации."));
-        alert.accept();
 
         //Bad_Path_No_Login_Credential_Check
-        password = driver.findElement(By.xpath("//tbody/tr[2]/td[2]/div[1]/input[1]"));
-        password.sendKeys("Az04!~#$%^&*()_+");
         try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            password = driver.findElement(By.xpath("//tbody/tr[2]/td[2]/div[1]/input[1]"));
+            password.sendKeys("Az04!~#$%^&*()_+");
+            loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
+            loginButton.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            alert = driver.switchTo().alert();
+            isCorrect = alert.getText().equals("Неверные данные для авторизации.");
+            System.out.println("wrong_no_login_credential_check: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            alert.accept();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } catch (WebDriverException wde) {
+            System.out.println("bad_path_failed!");
+            System.out.println(wde.getMessage());
+            isSuccess = false;
         }
-        loginButton = driver.findElement(By.xpath("//button[@id='button_submit_login_form']"));
-        loginButton.click();
-        alert = driver.switchTo().alert();
-        System.out.println("wrong_no_login_credential_check: " + alert.getText().equals("Неверные данные для авторизации."));
-        alert.accept();
 
         //Reset_Password_Check
-        resetPasswordButton = driver.findElement(By.xpath("//tbody/tr[1]/td[1]/a[1]/div[1]"));
-        resetPasswordButton.click();
-        WebElement we = driver.findElement(By.xpath("//button[contains(text(),'Отправить')]"));
-        System.out.println(we.getText());
+        try {
+            resetPasswordButton = driver.findElement(By.xpath("//tbody/tr[1]/td[1]/a[1]/div[1]"));
+            resetPasswordButton.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            WebElement loginOrEmailField = driver.findElement(By.xpath("//tbody/tr[1]/td[2]/input[1]"));
+            isDisplayedAndEnable("login_or_email", loginOrEmailField);
+            isCorrect = loginOrEmailField.getAttribute("placeholder").equals("Введите логин или email");
+            System.out.println("login_or_email_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            WebElement sendButton = driver.findElement(By.xpath("//button[contains(text(),'Отправить')]"));
+            isDisplayedAndEnable("send_button", sendButton);
+            isCorrect = sendButton.getText().equals("Отправить");
+            System.out.println("send_button_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            WebElement backToHome = driver.findElement(By.xpath("//div[contains(text(),'Назад к входу в систему')]"));
+            isDisplayedAndEnable("back_home", backToHome);
+            isCorrect = backToHome.getText().equals("Назад к входу в систему");
+            System.out.println("back_home_button_exist: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+            backToHome.click();
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            isCorrect = driver.getCurrentUrl().endsWith("type=customloginpage");
+            System.out.println("back_home_button_work: " + isCorrect);
+            if (isSuccess) isSuccess = isCorrect;
+        } catch (WebDriverException wde) {
+            System.out.println("reset_password_failed!");
+            System.out.println(wde.getMessage());
+            isSuccess = false;
+        }
+
+        return isSuccess;
+    }
+
+    public static void main(String[] args) {
+        if (new TestForQA().checkItAll()) {
+            System.out.println("Test_Success");
+        } else System.out.println("Test_Fail");
     }
 }
