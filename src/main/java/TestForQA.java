@@ -164,5 +164,7 @@ public class TestForQA {
         //Reset_Password_Check
         resetPasswordButton = driver.findElement(By.xpath("//tbody/tr[1]/td[1]/a[1]/div[1]"));
         resetPasswordButton.click();
+        WebElement we = driver.findElement(By.xpath("//button[contains(text(),'Отправить')]"));
+        System.out.println(we.getText());
     }
 }
